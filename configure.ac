@@ -4135,6 +4135,18 @@ AS_IF([test x"$enable_rubygems" = xno], [
 ])
 AC_SUBST(USE_RUBYGEMS)
 
+AC_ARG_ENABLE(extension-checks,
+        AS_HELP_STRING([--enable-extension-checks],
+                       [turn on runtime checking of extensions;
+                        disable for no checks (default),
+                        enable to emit deprecation warnings]),
+        [enable_extension_checks="$enableval"],
+        [enable_extension_checks=no])
+AS_IF([test x"$enable_extension_checks" = xyes],
+            [AC_DEFINE(ENABLE_EXTENSION_CHECKS, 1)],
+            [AC_DEFINE(ENABLE_EXTENSION_CHECKS, 0)])
+AC_SUBST(ENABLE_EXTENSION_CHECKS, $enable_extension_checks)
+
 arch_hdrdir="${EXTOUT}/include/${arch}/ruby"
 AS_MKDIR_P("${arch_hdrdir}")
 config_h="${arch_hdrdir}/config.h"
@@ -4299,6 +4311,7 @@ config_summary "compiler"            "$CC"
 config_summary "with pthread"        "$enable_pthread"
 config_summary "with coroutine"      "$coroutine_type"
 config_summary "enable shared libs"  "$ENABLE_SHARED"
+config_summary "enable cext checks"  "$enable_extension_checks"
 config_summary "dynamic library ext" "$DLEXT"
 config_summary "CFLAGS"              "$cflags"
 config_summary "CPPFLAGS"            "$cppflags"

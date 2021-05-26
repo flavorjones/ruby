@@ -2759,11 +2759,27 @@ rb_class_allocate_instance(VALUE klass)
     return obj;
 }
 
+#if ENABLE_EXTENSION_CHECKS
+static inline void
+rb_data_object_check(VALUE klass)
+{
+    if (klass != rb_cObject && (rb_get_alloc_func(klass) == rb_class_allocate_instance)) {
+        rb_warn("T_DATA class %"PRIsVALUE" should undefine or redefine the allocate method, please see doc/extension.rdoc", klass);
+    }
+}
+#endif
+
+
 VALUE
 rb_data_object_wrap(VALUE klass, void *datap, RUBY_DATA_FUNC dmark, RUBY_DATA_FUNC dfree)
 {
     RUBY_ASSERT_ALWAYS(dfree != (RUBY_DATA_FUNC)1);
-    if (klass) Check_Type(klass, T_CLASS);
+    if (klass) {
+        Check_Type(klass, T_CLASS);
+#if ENABLE_EXTENSION_CHECKS
+        rb_data_object_check(klass);
+#endif
+    }
     return newobj_of(klass, T_DATA, (VALUE)dmark, (VALUE)dfree, (VALUE)datap, FALSE, sizeof(RVALUE));
 }
 
@@ -2779,7 +2795,12 @@ VALUE
 rb_data_typed_object_wrap(VALUE klass, void *datap, const rb_data_type_t *type)
 {
     RUBY_ASSERT_ALWAYS(type);
-    if (klass) Check_Type(klass, T_CLASS);
+    if (klass) {
+        Check_Type(klass, T_CLASS);
+#if ENABLE_EXTENSION_CHECKS
+        rb_data_object_check(klass);
+#endif
+    }
     return newobj_of(klass, T_DATA, (VALUE)type, (VALUE)1, (VALUE)datap, type->flags & RUBY_FL_WB_PROTECTED, sizeof(RVALUE));
 }
 
