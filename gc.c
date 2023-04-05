@@ -12581,8 +12581,13 @@ ruby_xrealloc2_body(void *ptr, size_t n, size_t size)
 void
 ruby_sized_xfree(void *x, size_t size)
 {
-    if (x) {
-        objspace_xfree(&rb_objspace, x, size);
+    if (LIKELY(x)) {
+        if (LIKELY(GET_VM())) {
+            objspace_xfree(&rb_objspace, x, size);
+        }
+        else {
+            ruby_mimfree(x);
+        }
     }
 }
 
